@@ -161,7 +161,7 @@ int maxCustomerCapasity()
 	}
 	return counterIndis;
 }
-
+//Greedy Yaklasimi
 //Maksimum depo alani talep eden musterinin minimum maliyet ile hangi depoaya gidebilecegini buluyoruz.
 void findCustomerMinCost(int customer)
 {
@@ -200,7 +200,8 @@ void builCostAdd()
 	for (int j = 0; j < numberCustomer; j++)
 	{
 		addTotalCost(buildCostHW.data[WHChoise[j]]);
-		buildCostHW.data[WHChoise[j]] = 0;
+		//Depoya birden fazla urun yerlestirilmis olabilir. Her seferinde depo maliyetini almamiza gerek yok. Depoya bir urun atandigi anda deponun kuruldugunu farz ediyoruz.
+		buildCostHW.data[WHChoise[j]] = 0;	
 	}
 }
 
