@@ -8,7 +8,10 @@ using namespace std;
 //GLOBAL DEGISKENLER
 FILE* filePointer;
 int numberWH = 0, numberCustomer = 0, WHChoise[1000];
-double totalCost;
+double totalCost = 0;
+
+//Fonksiyon Bildirimleri
+void addTotalCost(double);
 
 //Dinamik dizinin rahat ve hizli bir sekilde kullanimi icin tanimladigimiz struct yapisi.
 struct  Warehouses{
@@ -20,7 +23,6 @@ struct  Warehouses{
 typedef struct Warehouses mainWH;
 
 mainWH capasityWH;
-mainWH buildCostHW;
 mainWH customerCapasity;
 mainWH roadCost[1000];
 
@@ -102,7 +104,7 @@ void menu()
 void fileItemGetArray()
 {
 	double temp = 0;
-	int counter = 0, costumer = 0, costumerCounter = 0, trigger = 0;
+	int counter = 0, customer = 0, customerCounter = 0, trigger = 0;
 	while (fscanf(filePointer, "%lf", &temp) != EOF)
 	{
 		if (counter == 0)
@@ -110,7 +112,6 @@ void fileItemGetArray()
 			//Dosyadan alinan eleman sayisi metrigine gore dinamik dizi tanimi
 			numberWH = temp;
 			createArray(&capasityWH, numberWH);
-			createArray(&buildCostHW, numberWH);
 			printf("\n%f", temp);
 		}
 		else if (counter == 1)
@@ -123,7 +124,7 @@ void fileItemGetArray()
 		{
 			//Ilk iki degerde cantanin maksimum agirlik degeri, dizi uzunlugu alinmasindan sonra degerlerin ve agirliklarin diziye alinmasi.
 			if (counter % 2 == 0)	addArray(&capasityWH, temp);
-			else					addArray(&buildCostHW, temp);
+			else					addTotalCost(temp);
 			printf("\n%f", temp);
 		}
 		else
@@ -136,13 +137,13 @@ void fileItemGetArray()
 			}
 			else
 			{
-				addArray(&roadCost[costumer], temp);
-				costumerCounter++;
+				addArray(&roadCost[customer], temp);
+				customerCounter++;
 				printf("%f ", temp);
-				if (costumerCounter == numberWH)
+				if (customerCounter == numberWH)
 				{
-					costumer++;
-					costumerCounter = 0;
+					customer++;
+					customerCounter = 0;
 					trigger = 0;
 				}
 			}
@@ -157,54 +158,73 @@ void addTotalCost(double cost)
 	totalCost += cost;
 }
 
-void findCostumerMinCost(int capasityValue, int costumerIndis)
+int maxCustomerCapasity()
 {
-	double cost = 0;
-	int WHNum = 0;
-
-	cost = 999999999;
-	for (int j = 0; j < roadCost[costumerIndis].indis; j++)
-	{
-		if (roadCost[costumerIndis].data[j] < cost)
-		{
-			cost = roadCost[costumerIndis].data[j];
-			WHNum = j;
-		}
-	}
-	printf("\n--> %f", cost);
-	customerCapasity.data[costumerIndis] = 0;	//Müsterinin artik bir talebi yok.
-	WHChoise[costumerIndis] = WHNum;
-	addTotalCost(cost);
-}
-
-void findMaxCostumerCapasite()
-{
-	int tempCapasity = 0, tempIndis=0;
+	//Maksimum depo istegini ve hangi musterinin istedigini bulduk.
+	double temp = 0;
+	int counterIndis = 0;
+	
 	for (int i = 0; i < customerCapasity.indis; i++)
 	{
-		if (customerCapasity.data[i] == 0) //Talep Yok.
+		if (customerCapasity.data[i] > temp)
 		{
-
-		}
-		else if (tempCapasity < customerCapasity.data[i])
-		{
-			tempCapasity = customerCapasity.data[i];
-			tempIndis = i;
+			temp = customerCapasity.data[i];
+			counterIndis = i;
 		}
 	}
-	printf("\n--> %d - %d", tempCapasity, tempIndis);
-	findCostumerMinCost(tempCapasity, tempIndis);
+	return counterIndis;
+}
+
+void findCustomerMinCost(int customer)
+{
+	double minCost=999999999;
+	int temp;
+	//O musterinin minimum hangi depoya gittigine bakacagiz
+	for (int j = 0; j < roadCost[customer].indis; j++)
+	{
+		if (minCost > roadCost[customer].data[j])
+		{
+			//Depo Seçimi
+			minCost = roadCost[customer].data[j];
+			temp = j;
+		}
+	}
+	if (capasityWH.data[temp] < customerCapasity.data[customer])
+	{
+		roadCost[customer].data[temp] *= 2;
+	}
+	else
+	{
+		capasityWH.data[temp] -= customerCapasity.data[customer];
+		customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
+		addTotalCost(roadCost[customer].data[temp]);
+		WHChoise[customer] = temp;
+	}
+
 }
 
 
 int main()
 {
+	int max = 0;
+	int triggerCount = 0;
+
 	menu();
 	fileItemGetArray();
 	for (int i = 0; i < customerCapasity.indis; i++)
 	{
-		if(customerCapasity.data[i]!=0)
-			findMaxCostumerCapasite();
+		max = maxCustomerCapasity();
+		findCustomerMinCost(max);
 	}
-	printf("--> Son: %f", totalCost);
-}
+	printf("\n Cost --> %f\n", totalCost);
+
+	for (int j = 0; j < capasityWH.indis; j++)
+	{
+		printf("\t--> %d", capasityWH.data[j]);
+	}
+
+	for (int j = 0; j < 1000; j++)
+	{
+		printf("\n--> %d", WHChoise[j]);
+	}
+}	
