@@ -7,7 +7,7 @@ using namespace std;
 
 //GLOBAL DEGISKENLER
 FILE* filePointer;
-int numberWH = 0, numberCustomer = 0, WHChoise[1000];
+int numberWH = 0, numberCustomer = 0 ,WHChoise[1000];
 double totalCost = 0;
 
 //Fonksiyon Bildirimleri
@@ -112,34 +112,29 @@ void fileItemGetArray()
 			//Dosyadan alinan eleman sayisi metrigine gore dinamik dizi tanimi
 			numberWH = temp;
 			createArray(&capasityWH, numberWH);
-			printf("\n%f", temp);
 		}
 		else if (counter == 1)
 		{
 			numberCustomer = temp;
 			createArray(&customerCapasity, numberCustomer);
-			printf("\t%f", temp);
 		}
 		else if (counter > 0 && counter <= numberWH * 2 + 1)
 		{
 			//Ilk iki degerde cantanin maksimum agirlik degeri, dizi uzunlugu alinmasindan sonra degerlerin ve agirliklarin diziye alinmasi.
 			if (counter % 2 == 0)	addArray(&capasityWH, temp);
 			else					addTotalCost(temp);
-			printf("\n%f", temp);
 		}
 		else
 		{
 			if (trigger == 0)
 			{
 				addArray(&customerCapasity, temp);
-				printf("\n%f\n", temp);
 				trigger++;
 			}
 			else
 			{
 				addArray(&roadCost[customer], temp);
 				customerCounter++;
-				printf("%f ", temp);
 				if (customerCounter == numberWH)
 				{
 					customer++;
@@ -203,6 +198,24 @@ void findCustomerMinCost(int customer)
 
 }
 
+//Atamalar sonrasi kalan yerleri yazdir
+void remainingPlace()
+{
+	printf("\nKalan Yerler:\n");
+	for (int j = 0; j < capasityWH.indis; j++)
+	{
+		printf("\t--> %f", capasityWH.data[j]);
+	}
+}
+
+void WHChoiseList()
+{
+	printf("\nSecilen Depolarin ID Listesi\n");
+	for (int j = 0; j < numberCustomer; j++)
+	{
+		printf("\t %d", WHChoise[j]);
+	}
+}
 
 int main()
 {
@@ -211,20 +224,17 @@ int main()
 
 	menu();
 	fileItemGetArray();
+
 	for (int i = 0; i < customerCapasity.indis; i++)
 	{
 		max = maxCustomerCapasity();
 		findCustomerMinCost(max);
 	}
-	printf("\n Cost --> %f\n", totalCost);
+	
+	
+	printf("\n\nTum Maliyet: --> %f\n", totalCost);
 
-	for (int j = 0; j < capasityWH.indis; j++)
-	{
-		printf("\t--> %d", capasityWH.data[j]);
-	}
-
-	for (int j = 0; j < 1000; j++)
-	{
-		printf("\n--> %d", WHChoise[j]);
-	}
+	
+	remainingPlace();
+	WHChoiseList();
 }	
