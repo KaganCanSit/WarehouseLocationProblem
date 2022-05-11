@@ -1,9 +1,6 @@
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 using namespace std;
-
-//f lf
 
 //GLOBAL DEGISKENLER
 FILE* filePointer;
@@ -23,8 +20,10 @@ struct  Warehouses{
 typedef struct Warehouses mainWH;
 
 mainWH capasityWH;
+mainWH buildCostHW;
 mainWH customerCapasity;
 mainWH roadCost[1000];
+mainWH clearWHChoise;
 
 //Dinamik dizi icin bellekten alan tahsisi.
 void createArray(mainWH* d, int sizeVal)
@@ -69,22 +68,13 @@ void resetArray(mainWH* d)
 	d->indis = 0;
 }
 
-//Dizi degerlerini yazdirilmasi icin kullandigimiz fonksiyon.
-void writeArray(mainWH* d)
-{
-	printf("Veriler\n");
-	int i;
-	for (i = 0; i < d->indis; i++)
-		printf("%f\n", d->data[i]);
-}
-
 //	Menu Fonksiyonu - Bu fonksiyonun amaci kullaniciya islem yapmak istedigi dosyayi sectirmek. Ve dosya ismini proje geneline hazir hale getirerek, islemleri hazirlamak.
 void menu()
 {
 	int choise = 0;
 	printf("*****************************************  MENU  *****************************************\n\n");
 	printf("Warehouse Location Problem Select the file to be applied. (Enter Line Number : ->Simple; 1)\n");
-	printf("1-ks_4_0.txt\n2-ks_100_0.txt\n3-ks_10000_0.txt\nSelect:");
+	printf("1-wl_50_1.txt\n2-wl_200_5.txt\n3-wl_1000_1.txt.txt\nSelect:");
 	scanf_s("%d", &choise);
 
 	switch (choise)
@@ -122,7 +112,7 @@ void fileItemGetArray()
 		{
 			//Ilk iki degerde cantanin maksimum agirlik degeri, dizi uzunlugu alinmasindan sonra degerlerin ve agirliklarin diziye alinmasi.
 			if (counter % 2 == 0)	addArray(&capasityWH, temp);
-			else					addTotalCost(temp);
+			else					addArray(&buildCostHW, temp);
 		}
 		else
 		{
@@ -148,11 +138,13 @@ void fileItemGetArray()
 	fclose(filePointer);
 }
 
+//Total Maliyet Hesabi islemi icin
 void addTotalCost(double cost)
 {
 	totalCost += cost;
 }
 
+//Maksimum depo alani talep eden musteriyi buluyoruz. Bunun sebebi carpan degerinin buyumesi.
 int maxCustomerCapasity()
 {
 	//Maksimum depo istegini ve hangi musterinin istedigini bulduk.
@@ -170,10 +162,11 @@ int maxCustomerCapasity()
 	return counterIndis;
 }
 
+//Maksimum depo alani talep eden musterinin minimum maliyet ile hangi depoaya gidebilecegini buluyoruz.
 void findCustomerMinCost(int customer)
 {
 	double minCost=999999999;
-	int temp;
+	int temp=0;
 	//O musterinin minimum hangi depoya gittigine bakacagiz
 	for (int j = 0; j < roadCost[customer].indis; j++)
 	{
@@ -198,24 +191,40 @@ void findCustomerMinCost(int customer)
 
 }
 
+//Secilen Depolarin Maliyetlerini Cost'a ekle.
+void builCostAdd()
+{
+	createArray(&clearWHChoise, numberCustomer);
+
+	int counter = 0;
+	for (int j = 0; j < numberCustomer; j++)
+	{
+		addTotalCost(buildCostHW.data[WHChoise[j]]);
+		buildCostHW.data[WHChoise[j]] = 0;
+	}
+}
+
 //Atamalar sonrasi kalan yerleri yazdir
 void remainingPlace()
 {
 	printf("\nKalan Yerler:\n");
 	for (int j = 0; j < capasityWH.indis; j++)
 	{
-		printf("\t--> %f", capasityWH.data[j]);
+		printf("%f |\t", capasityWH.data[j]);
 	}
 }
 
+//Secilen Depolari Yazdir
 void WHChoiseList()
 {
 	printf("\nSecilen Depolarin ID Listesi\n");
 	for (int j = 0; j < numberCustomer; j++)
 	{
-		printf("\t %d", WHChoise[j]);
+		printf("%d |\t", WHChoise[j]);
 	}
+	printf("\n\n");
 }
+
 
 int main()
 {
@@ -230,11 +239,17 @@ int main()
 		max = maxCustomerCapasity();
 		findCustomerMinCost(max);
 	}
-	
+	builCostAdd();
 	
 	printf("\n\nTum Maliyet: --> %f\n", totalCost);
-
-	
-	remainingPlace();
+	//remainingPlace();
 	WHChoiseList();
+
+	//Bellekler iade ediliyor.
+	resetArray(&capasityWH);
+	resetArray(&customerCapasity);
+	for (int i = 0; i < 1000; i++)
+	{
+		resetArray(&roadCost[i]);
+	}
 }	
