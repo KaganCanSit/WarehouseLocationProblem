@@ -7,8 +7,8 @@ using namespace std;
 
 //GLOBAL DEGISKENLER
 FILE* filePointer;
-int numberWH = 0, numberCustomer = 0;
-
+int numberWH = 0, numberCustomer = 0, WHChoise[1000];
+double totalCost;
 
 //Dinamik dizinin rahat ve hizli bir sekilde kullanimi icin tanimladigimiz struct yapisi.
 struct  Warehouses{
@@ -88,21 +88,21 @@ void menu()
 	switch (choise)
 	{
 		//case 1:		filePointer = fopen("wl_50_1.txt", "r");	break;
-		case 1:		filePointer = fopen("deneme.txt", "r");	break;
-		case 2:		filePointer = fopen("wl_200_5.txt", "r");	break;
-		case 3:		filePointer = fopen("wl_1000_1.txt", "r");	break;
-		default:
-			system("cls"); //Console Ekrani Temizleme
-			printf("***************************  Incorrect Entry! Please Try Again.  ***************************\n\n");
-			menu();
-		}
+	case 1:		filePointer = fopen("deneme.txt", "r");	break;
+	case 2:		filePointer = fopen("wl_200_5.txt", "r");	break;
+	case 3:		filePointer = fopen("wl_1000_1.txt", "r");	break;
+	default:
+		system("cls"); //Console Ekrani Temizleme
+		printf("***************************  Incorrect Entry! Please Try Again.  ***************************\n\n");
+		menu();
+	}
 }
 
 //Txt dosyasi icerisinde tanimli degerleri dosyadan okuyarak dinamik olarak bildirdigimiz dizi icerisinde tanimliyoruz.
 void fileItemGetArray()
 {
 	double temp = 0;
-	int counter = 0, costumer=0, costumerCounter = 0, trigger=0;
+	int counter = 0, costumer = 0, costumerCounter = 0, trigger = 0;
 	while (fscanf(filePointer, "%lf", &temp) != EOF)
 	{
 		if (counter == 0)
@@ -119,7 +119,7 @@ void fileItemGetArray()
 			createArray(&customerCapasity, numberCustomer);
 			printf("\t%f", temp);
 		}
-		else if(counter>0 && counter <= numberWH*2+1)
+		else if (counter > 0 && counter <= numberWH * 2 + 1)
 		{
 			//Ilk iki degerde cantanin maksimum agirlik degeri, dizi uzunlugu alinmasindan sonra degerlerin ve agirliklarin diziye alinmasi.
 			if (counter % 2 == 0)	addArray(&capasityWH, temp);
@@ -132,19 +132,19 @@ void fileItemGetArray()
 			{
 				addArray(&customerCapasity, temp);
 				printf("\n%f\n", temp);
-				costumer++;
 				trigger++;
 			}
 			else
 			{
 				addArray(&roadCost[costumer], temp);
 				costumerCounter++;
-				printf("%f", temp);
+				printf("%f ", temp);
 				if (costumerCounter == numberWH)
 				{
+					costumer++;
 					costumerCounter = 0;
 					trigger = 0;
- 				}
+				}
 			}
 		}
 		counter++;
@@ -152,10 +152,59 @@ void fileItemGetArray()
 	fclose(filePointer);
 }
 
+void addTotalCost(double cost)
+{
+	totalCost += cost;
+}
+
+void findCostumerMinCost(int capasityValue, int costumerIndis)
+{
+	double cost = 0;
+	int WHNum = 0;
+
+	cost = 999999999;
+	for (int j = 0; j < roadCost[costumerIndis].indis; j++)
+	{
+		if (roadCost[costumerIndis].data[j] < cost)
+		{
+			cost = roadCost[costumerIndis].data[j];
+			WHNum = j;
+		}
+	}
+	printf("\n--> %f", cost);
+	customerCapasity.data[costumerIndis] = 0;	//Müsterinin artik bir talebi yok.
+	WHChoise[costumerIndis] = WHNum;
+	addTotalCost(cost);
+}
+
+void findMaxCostumerCapasite()
+{
+	int tempCapasity = 0, tempIndis=0;
+	for (int i = 0; i < customerCapasity.indis; i++)
+	{
+		if (customerCapasity.data[i] == 0) //Talep Yok.
+		{
+
+		}
+		else if (tempCapasity < customerCapasity.data[i])
+		{
+			tempCapasity = customerCapasity.data[i];
+			tempIndis = i;
+		}
+	}
+	printf("\n--> %d - %d", tempCapasity, tempIndis);
+	findCostumerMinCost(tempCapasity, tempIndis);
+}
 
 
 int main()
 {
 	menu();
 	fileItemGetArray();
+	for (int i = 0; i < customerCapasity.indis; i++)
+	{
+		if(customerCapasity.data[i]!=0)
+			findMaxCostumerCapasite();
+	}
+	printf("--> Son: %f", totalCost);
 }
