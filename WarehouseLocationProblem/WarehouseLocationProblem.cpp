@@ -4,7 +4,7 @@ using namespace std;
 
 //GLOBAL DEGISKENLER
 FILE* filePointer;
-int numberWH = 0, numberCustomer = 0 ,WHChoise[1000];
+int numberWH = 0, numberCustomer = 0 ,WHChoise[1000], lastWHChoise = 0, customerWHCounter=0;
 double totalCost = 0;
 
 //Fonksiyon Bildirimleri
@@ -23,7 +23,6 @@ mainWH capasityWH;
 mainWH buildCostHW;
 mainWH customerCapasity;
 mainWH roadCost[1000];
-mainWH clearWHChoise;
 
 //Dinamik dizi icin bellekten alan tahsisi.
 void createArray(mainWH* d, int sizeVal)
@@ -36,7 +35,6 @@ void createArray(mainWH* d, int sizeVal)
 //Dinamik dizi degerinin ilk tanimdan buyuk olmasi durumunda genisletme ve bellekten ek alan alma.
 void expandArray(mainWH* d)
 {
-	
 	if (d->indis == d->arraySize)
 	{
 		double* cntrl;
@@ -74,19 +72,19 @@ void menu()
 	int choise = 0;
 	printf("*****************************************  MENU  *****************************************\n\n");
 	printf("Warehouse Location Problem Select the file to be applied. (Enter Line Number : ->Simple; 1)\n");
-	printf("1-wl_50_1.txt\n2-wl_200_5.txt\n3-wl_1000_1.txt.txt\nSelect:");
+	printf("0-soruornegi.txt\n1-wl_50_1.txt\n2-wl_200_5.txt\n3-wl_1000_1.txt.txt\nSelect:");
 	scanf_s("%d", &choise);
 
 	switch (choise)
 	{
-		//case 1:		filePointer = fopen("wl_50_1.txt", "r");	break;
-	case 1:		filePointer = fopen("deneme.txt", "r");	break;
-	case 2:		filePointer = fopen("wl_200_5.txt", "r");	break;
-	case 3:		filePointer = fopen("wl_1000_1.txt", "r");	break;
-	default:
-		system("cls"); //Console Ekrani Temizleme
-		printf("***************************  Incorrect Entry! Please Try Again.  ***************************\n\n");
-		menu();
+		case 0:		filePointer = fopen("soruornegi.txt", "r");		break;
+		case 1:		filePointer = fopen("wl_50_1.txt", "r");	break;
+		case 2:		filePointer = fopen("wl_200_5.txt", "r");	break;
+		case 3:		filePointer = fopen("wl_1000_1.txt", "r");	break;
+		default:
+			system("cls"); //Console Ekrani Temizleme
+			printf("***************************  Incorrect Entry! Please Try Again.  ***************************\n\n");
+			menu();
 	}
 }
 
@@ -166,7 +164,7 @@ int maxCustomerCapasity()
 void findCustomerMinCost(int customer)
 {
 	double minCost=999999999;
-	int temp=0;
+	int temp = 0;
 	//O musterinin minimum hangi depoya gittigine bakacagiz
 	for (int j = 0; j < roadCost[customer].indis; j++)
 	{
@@ -174,7 +172,7 @@ void findCustomerMinCost(int customer)
 		{
 			//Depo Seçimi
 			minCost = roadCost[customer].data[j];
-			temp = j;
+			temp = j;//Secilen Depo
 		}
 	}
 	if (capasityWH.data[temp] < customerCapasity.data[customer])
@@ -183,19 +181,32 @@ void findCustomerMinCost(int customer)
 	}
 	else
 	{
-		capasityWH.data[temp] -= customerCapasity.data[customer];
-		customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
-		addTotalCost(roadCost[customer].data[temp]);
-		WHChoise[customer] = temp;
+		//printf("\nYeni Insa Maliyeti + Yeni Ulasim Maliyeti: %f >  Eski Depoya Gore Ulasim Maliyeti:%f ---- Eski Kapasite: %f > Musterinin Istek Kapasitesi: %f", (buildCostHW.data[temp] + roadCost[customer].data[temp]) , roadCost[customer].data[lastWHChoise] , capasityWH.data[lastWHChoise] , customerCapasity.data[customer]);
+		//Mantikin Ozu -> Yeni Deponun Kurulum Maliyeti + Yeni Depoya Ulasim Maliyet > Eski Depoya Yolculuk Maliyetinden fazlaysa ve eski depoda alan varsa eski depoyu tercih et.
+		if (customerWHCounter != 0 && (buildCostHW.data[temp] + roadCost[customer].data[temp]) > roadCost[customer].data[lastWHChoise] && capasityWH.data[lastWHChoise] >= customerCapasity.data[customer])
+		{
+			//printf("\tGirdi");
+			capasityWH.data[lastWHChoise] -= customerCapasity.data[customer];
+			customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
+			addTotalCost(roadCost[customer].data[lastWHChoise]);
+			WHChoise[customer] = lastWHChoise;
+		}
+		else
+		{
+			//printf("\tGirmedi");
+			customerWHCounter++;
+			capasityWH.data[temp] -= customerCapasity.data[customer];
+			customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
+			addTotalCost(roadCost[customer].data[temp]);
+			WHChoise[customer] = temp;
+			lastWHChoise = temp;	//En son secilen depo. -> Kurulum maliyeti farki icin gerekli.
+		}
 	}
-
 }
 
 //Secilen Depolarin Maliyetlerini Cost'a ekle.
 void builCostAdd()
 {
-	createArray(&clearWHChoise, numberCustomer);
-
 	int counter = 0;
 	for (int j = 0; j < numberCustomer; j++)
 	{
@@ -208,10 +219,10 @@ void builCostAdd()
 //Atamalar sonrasi kalan yerleri yazdir
 void remainingPlace()
 {
-	printf("\nKalan Yerler:\n");
+	printf("\nDepolarda Kalan Yerler:\n");
 	for (int j = 0; j < capasityWH.indis; j++)
 	{
-		printf("%f |\t", capasityWH.data[j]);
+		printf("%d. %f |\n",j, capasityWH.data[j]);
 	}
 }
 
@@ -243,7 +254,7 @@ int main()
 	builCostAdd();
 	
 	printf("\n\nTum Maliyet: --> %f\n", totalCost);
-	//remainingPlace();
+	remainingPlace();
 	WHChoiseList();
 
 	//Bellekler iade ediliyor.
