@@ -133,6 +133,13 @@ void fileItemGetArray()
 		}
 		counter++;
 	}
+	int deger = 0;
+	printf("\n\nMusteri Talepleri:");
+	for (int i = 0; i < customerCapasity.indis; i++)
+	{
+		deger += customerCapasity.data[i];
+	}
+	printf("%d", deger);
 	fclose(filePointer);
 }
 
@@ -140,6 +147,20 @@ void fileItemGetArray()
 void addTotalCost(double cost)
 {
 	totalCost += cost;
+}
+
+//Minimum depo kurma maliyetine sahip deoyu buluyoruz.
+int minBuildCostHW()
+{
+	int WHindis = 0;
+	for (int i = 0; i < buildCostHW.indis; i++)
+	{
+		if (buildCostHW.data[i] < buildCostHW.data[0])
+		{
+			WHindis = i;
+		}
+	}
+	return WHindis;
 }
 
 //Maksimum depo alani talep eden musteriyi buluyoruz. Bunun sebebi carpan degerinin buyumesi.
@@ -165,6 +186,8 @@ void findCustomerMinCost(int customer)
 {
 	double minCost=999999999;
 	int temp = 0;
+	int minBCostIndis = minBuildCostHW();
+
 	//O musterinin minimum hangi depoya gittigine bakacagiz
 	for (int j = 0; j < roadCost[customer].indis; j++)
 	{
@@ -195,11 +218,24 @@ void findCustomerMinCost(int customer)
 		{
 			//printf("\tGirmedi");
 			customerWHCounter++;
-			capasityWH.data[temp] -= customerCapasity.data[customer];
-			customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
-			addTotalCost(roadCost[customer].data[temp]);
-			WHChoise[customer] = temp;
-			lastWHChoise = temp;	//En son secilen depo. -> Kurulum maliyeti farki icin gerekli.
+
+			//Eger en dusuk maliyetli depo + en dusuk maliyetli depoya yolculuk maliyeti < Yeni Depo Kurulum Maliyeti + Yolculuk Maliyetinden Kucuk Depoyu Sec
+			if (buildCostHW.data[minBCostIndis] + roadCost[customer].data[minBCostIndis] < buildCostHW.data[temp] + roadCost[customer].data[temp] && capasityWH.data[minBCostIndis] >= customerCapasity.data[customer])
+			{
+				capasityWH.data[minBCostIndis] -= customerCapasity.data[customer];
+				customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
+				addTotalCost(roadCost[customer].data[minBCostIndis]);
+				WHChoise[customer] = minBCostIndis;
+				lastWHChoise = minBCostIndis;	//En son secilen depo. -> Kurulum maliyeti farki icin gerekli.
+			}
+			else
+			{
+				capasityWH.data[temp] -= customerCapasity.data[customer];
+				customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
+				addTotalCost(roadCost[customer].data[temp]);
+				WHChoise[customer] = temp;
+				lastWHChoise = temp;	//En son secilen depo. -> Kurulum maliyeti farki icin gerekli.
+			}
 		}
 	}
 }
