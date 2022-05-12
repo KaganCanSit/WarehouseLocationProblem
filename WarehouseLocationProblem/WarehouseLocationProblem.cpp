@@ -7,9 +7,6 @@ FILE* filePointer;
 int numberWH = 0, numberCustomer = 0 ,WHChoise[1000], lastWHChoise = 0, customerWHCounter=0;
 double totalCost = 0;
 
-//Fonksiyon Bildirimleri
-void addTotalCost(double);
-
 //Dinamik dizinin rahat ve hizli bir sekilde kullanimi icin tanimladigimiz struct yapisi.
 struct  Warehouses{
 	int arraySize;				//Dizi Buyuklugu
@@ -97,29 +94,31 @@ void fileItemGetArray()
 	{
 		if (counter == 0)
 		{
-			//Dosyadan alinan eleman sayisi metrigine gore dinamik dizi tanimi
+			//Dosyadan alinan depo sayisi metrigine gore dinamik dizi tanimi
 			numberWH = temp;
 			createArray(&capasityWH, numberWH);
 		}
 		else if (counter == 1)
 		{
+			//Dosyadan alinan musteri sayisi metrigine gore dinamik dizi tanimi
 			numberCustomer = temp;
 			createArray(&customerCapasity, numberCustomer);
 		}
 		else if (counter > 0 && counter <= numberWH * 2 + 1)
 		{
-			//Ilk iki degerde cantanin maksimum agirlik degeri, dizi uzunlugu alinmasindan sonra degerlerin ve agirliklarin diziye alinmasi.
+			//Ilk iki degerde depo sayisi  ve musteri sayisi degerleri dizi uzunlugu parametresi olarak alinmasindan sonra degerlerin ve agirliklarin diziye alinmasi.
 			if (counter % 2 == 0)	addArray(&capasityWH, temp);
 			else					addArray(&buildCostHW, temp);
 		}
 		else
 		{
+			//Musterinin talep ettigi depo kapasitesini aliyoruz.
 			if (trigger == 0)
 			{
 				addArray(&customerCapasity, temp);
 				trigger++;
 			}
-			else
+			else	//Musterinin her depo icin yolculuk maliyeetlerini aldiktan sonra diger musterinin talep ettigi depo kapasitesi almak icin trigger'a mod alarak basa donduruyoruz.
 			{
 				addArray(&roadCost[customer], temp);
 				customerCounter++;
@@ -133,13 +132,6 @@ void fileItemGetArray()
 		}
 		counter++;
 	}
-	int deger = 0;
-	printf("\n\nMusteri Talepleri:");
-	for (int i = 0; i < customerCapasity.indis; i++)
-	{
-		deger += customerCapasity.data[i];
-	}
-	printf("%d", deger);
 	fclose(filePointer);
 }
 
@@ -149,21 +141,23 @@ void addTotalCost(double cost)
 	totalCost += cost;
 }
 
-//Minimum depo kurma maliyetine sahip deoyu buluyoruz.
+//Minimum depo kurma maliyetine sahip deponun sirasini buluyoruz.
 int minBuildCostHW()
 {
 	int WHindis = 0;
+	double temp = 99999999;
 	for (int i = 0; i < buildCostHW.indis; i++)
 	{
-		if (buildCostHW.data[i] < buildCostHW.data[0])
+		if (buildCostHW.data[i] < temp)
 		{
+			temp = buildCostHW.data[i];
 			WHindis = i;
 		}
 	}
 	return WHindis;
 }
 
-//Maksimum depo alani talep eden musteriyi buluyoruz. Bunun sebebi carpan degerinin buyumesi.
+//Maksimum depo alani talep eden musterinin indis degerini buluyoruz. Bunun sebebi carpan degerinin buyumemesi icin max depo isteginde bulunan musteriyi baz almak icin kullanacagiz.
 int maxCustomerCapasity()
 {
 	//Maksimum depo istegini ve hangi musterinin istedigini bulduk.
@@ -180,6 +174,16 @@ int maxCustomerCapasity()
 	}
 	return counterIndis;
 }
+
+//Farkli Sartlar icin satim islemi fonksiyonu
+void SalesOperation(int WHindis, int customerID)
+{
+	capasityWH.data[WHindis] -= customerCapasity.data[customerID];
+	customerCapasity.data[customerID] = 0; //Musteri talebi sonlandi.
+	addTotalCost(roadCost[customerID].data[WHindis]);
+	WHChoise[customerID] = WHindis;
+}
+
 //Greedy Yaklasimi
 //Maksimum depo alani talep eden musterinin minimum maliyet ile hangi depoaya gidebilecegini buluyoruz.
 void findCustomerMinCost(int customer)
@@ -198,52 +202,41 @@ void findCustomerMinCost(int customer)
 			temp = j;//Secilen Depo
 		}
 	}
+	//Depoda yer yoksa onlem!
 	if (capasityWH.data[temp] < customerCapasity.data[customer])
 	{
 		roadCost[customer].data[temp] *= 2;
 	}
 	else
 	{
-		//printf("\nYeni Insa Maliyeti + Yeni Ulasim Maliyeti: %f >  Eski Depoya Gore Ulasim Maliyeti:%f ---- Eski Kapasite: %f > Musterinin Istek Kapasitesi: %f", (buildCostHW.data[temp] + roadCost[customer].data[temp]) , roadCost[customer].data[lastWHChoise] , capasityWH.data[lastWHChoise] , customerCapasity.data[customer]);
 		//Mantikin Ozu -> Yeni Deponun Kurulum Maliyeti + Yeni Depoya Ulasim Maliyet > Eski Depoya Yolculuk Maliyetinden fazlaysa ve eski depoda alan varsa eski depoyu tercih et.
 		if (customerWHCounter != 0 && (buildCostHW.data[temp] + roadCost[customer].data[temp]) > roadCost[customer].data[lastWHChoise] && capasityWH.data[lastWHChoise] >= customerCapasity.data[customer])
 		{
-			//printf("\tGirdi");
-			capasityWH.data[lastWHChoise] -= customerCapasity.data[customer];
-			customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
-			addTotalCost(roadCost[customer].data[lastWHChoise]);
-			WHChoise[customer] = lastWHChoise;
+			SalesOperation(lastWHChoise, customer);
 		}
 		else
 		{
-			//printf("\tGirmedi");
 			customerWHCounter++;
 
-			//Eger en dusuk maliyetli depo + en dusuk maliyetli depoya yolculuk maliyeti < Yeni Depo Kurulum Maliyeti + Yolculuk Maliyetinden Kucuk Depoyu Sec
+			//Eger en dusuk maliyetli depo + en dusuk maliyetli depoya yolculuk maliyeti < Yeni Depo Kurulum Maliyeti + Yeni Depoya Yolculuk Maliyetinden kucuk ise en dusuk maliyetli depoyu Sec
 			if (buildCostHW.data[minBCostIndis] + roadCost[customer].data[minBCostIndis] < buildCostHW.data[temp] + roadCost[customer].data[temp] && capasityWH.data[minBCostIndis] >= customerCapasity.data[customer])
 			{
-				capasityWH.data[minBCostIndis] -= customerCapasity.data[customer];
-				customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
-				addTotalCost(roadCost[customer].data[minBCostIndis]);
-				WHChoise[customer] = minBCostIndis;
+				SalesOperation(minBCostIndis, customer);
 				lastWHChoise = minBCostIndis;	//En son secilen depo. -> Kurulum maliyeti farki icin gerekli.
 			}
 			else
 			{
-				capasityWH.data[temp] -= customerCapasity.data[customer];
-				customerCapasity.data[customer] = 0; //Musteri talebi sonlandi.
-				addTotalCost(roadCost[customer].data[temp]);
-				WHChoise[customer] = temp;
+				SalesOperation(temp,customer);
 				lastWHChoise = temp;	//En son secilen depo. -> Kurulum maliyeti farki icin gerekli.
 			}
 		}
 	}
 }
 
+
 //Secilen Depolarin Maliyetlerini Cost'a ekle.
 void builCostAdd()
 {
-	int counter = 0;
 	for (int j = 0; j < numberCustomer; j++)
 	{
 		addTotalCost(buildCostHW.data[WHChoise[j]]);
@@ -258,7 +251,7 @@ void remainingPlace()
 	printf("\nDepolarda Kalan Yerler:\n");
 	for (int j = 0; j < capasityWH.indis; j++)
 	{
-		printf("%d. %f |\n",j, capasityWH.data[j]);
+		printf("%d. %.f |\n",j, capasityWH.data[j]);
 	}
 }
 
@@ -268,7 +261,7 @@ void WHChoiseList()
 	printf("\nSecilen Depolarin ID Listesi\n");
 	for (int j = 0; j < numberCustomer; j++)
 	{
-		printf("%d |\t", WHChoise[j]);
+		printf("%d | ", WHChoise[j]);
 	}
 	printf("\n\n");
 }
@@ -276,22 +269,20 @@ void WHChoiseList()
 
 int main()
 {
-	int max = 0;
-	int triggerCount = 0;
-
 	menu();
 	fileItemGetArray();
 
 	for (int i = 0; i < customerCapasity.indis; i++)
 	{
-		max = maxCustomerCapasity();
+		int max = maxCustomerCapasity();
 		findCustomerMinCost(max);
 	}
 	builCostAdd();
 	
 	printf("\n\nTum Maliyet: --> %f\n", totalCost);
-	remainingPlace();
 	WHChoiseList();
+	remainingPlace();
+	
 
 	//Bellekler iade ediliyor.
 	resetArray(&capasityWH);
@@ -300,4 +291,4 @@ int main()
 	{
 		resetArray(&roadCost[i]);
 	}
-}	
+}

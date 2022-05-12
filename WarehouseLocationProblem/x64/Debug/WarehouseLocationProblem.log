@@ -1,5 +1,4 @@
 ﻿  WarehouseLocationProblem.cpp
-C:\Users\kagan\Desktop\Develop\AlgoritmaAnalizi\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem.cpp(101,15): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\kagan\Desktop\Develop\AlgoritmaAnalizi\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem.cpp(106,21): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\kagan\Desktop\Develop\AlgoritmaAnalizi\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem.cpp(140,35): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+C:\Users\kagan\Desktop\Develop\AlgoritmaAnalizi\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem.cpp(98,15): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\kagan\Desktop\Develop\AlgoritmaAnalizi\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem\WarehouseLocationProblem.cpp(104,21): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
   WarehouseLocationProblem.vcxproj -> C:\Users\kagan\Desktop\Develop\AlgoritmaAnalizi\WarehouseLocationProblem\WarehouseLocationProblem\x64\Debug\WarehouseLocationProblem.exe
