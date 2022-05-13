@@ -89,7 +89,7 @@ void menu()
 void fileItemGetArray()
 {
 	double temp = 0;
-	int counter = 0, customer = 0, customerCounter = 0, trigger = 0;
+	int counter = 0, customer = 0, customerCounter = 0;
 	while (fscanf(filePointer, "%lf", &temp) != EOF)
 	{
 		if (counter == 0)
@@ -113,21 +113,14 @@ void fileItemGetArray()
 		else
 		{
 			//Musterinin talep ettigi depo kapasitesini aliyoruz.
-			if (trigger == 0)
+			if (customerCounter == 0)		addArray(&customerCapasity, temp);
+			else							addArray(&roadCost[customer], temp);
+
+			customerCounter++;
+			if (customerCounter == numberWH + 1)
 			{
-				addArray(&customerCapasity, temp);
-				trigger++;
-			}
-			else	//Musterinin her depo icin yolculuk maliyeetlerini aldiktan sonra diger musterinin talep ettigi depo kapasitesi almak icin trigger'a mod alarak basa donduruyoruz.
-			{
-				addArray(&roadCost[customer], temp);
-				customerCounter++;
-				if (customerCounter == numberWH)
-				{
-					customer++;
-					customerCounter = 0;
-					trigger = 0;
-				}
+				customer++;
+				customerCounter = 0;
 			}
 		}
 		counter++;
@@ -175,6 +168,7 @@ int maxCustomerCapasity()
 	return counterIndis;
 }
 
+
 //Farkli Sartlar icin satim islemi fonksiyonu
 void SalesOperation(int WHindis, int customerID)
 {
@@ -205,7 +199,7 @@ void findCustomerMinCost(int customer)
 	//Depoda yer yoksa onlem!
 	if (capasityWH.data[temp] < customerCapasity.data[customer])
 	{
-		roadCost[customer].data[temp] *= 2;
+		roadCost[customer].data[temp] *= 2;	//O depoda yer yoksa kullanilmasi zaten mumkun degil. Maliyetini arttiriyoruz.
 	}
 	else
 	{
