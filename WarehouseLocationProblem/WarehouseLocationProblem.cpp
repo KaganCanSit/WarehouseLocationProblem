@@ -134,38 +134,32 @@ void addTotalCost(double cost)
 	totalCost += cost;
 }
 
-//Minimum depo kurma maliyetine sahip deponun sirasini buluyoruz.
-int minBuildCostHW()
+//Islem cozumunda gerekli olan, dinamik dizi ile tanimli degerlerin bulunmasini saglar.
+int minOrMaxValueFindIndis(mainWH* d, int choise) //Choise -> 0 Min / 1 Max
 {
-	int WHindis = 0;
-	double temp = 99999999;
-	for (int i = 0; i < buildCostHW.indis; i++)
-	{
-		if (buildCostHW.data[i] < temp)
-		{
-			temp = buildCostHW.data[i];
-			WHindis = i;
-		}
-	}
-	return WHindis;
-}
+	int tempIndis = 0;
+	double minTempValue= 9999999, maxTempValue=0;
 
-//Maksimum depo alani talep eden musterinin indis degerini buluyoruz. Bunun sebebi carpan degerinin buyumemesi icin max depo isteginde bulunan musteriyi baz almak icin kullanacagiz.
-int maxCustomerCapasity()
-{
-	//Maksimum depo istegini ve hangi musterinin istedigini bulduk.
-	double temp = 0;
-	int counterIndis = 0;
-	
-	for (int i = 0; i < customerCapasity.indis; i++)
+	for (int i = 0; i < d->indis; i++)
 	{
-		if (customerCapasity.data[i] > temp)
+		if (choise == 0)
 		{
-			temp = customerCapasity.data[i];
-			counterIndis = i;
+			if (d->data[i] < minTempValue)
+			{
+				minTempValue = d->data[i];
+				tempIndis = i;
+			}
+		}
+		else
+		{
+			if (d->data[i] > maxTempValue)
+			{
+				maxTempValue = d->data[i];
+				tempIndis = i;
+			}
 		}
 	}
-	return counterIndis;
+	return tempIndis;
 }
 
 
@@ -175,7 +169,7 @@ void SalesOperation(int WHindis, int customerID)
 	capasityWH.data[WHindis] -= customerCapasity.data[customerID];
 	customerCapasity.data[customerID] = 0; //Musteri talebi sonlandi.
 	addTotalCost(roadCost[customerID].data[WHindis]);
-	WHChoise[customerID] = WHindis;
+	WHChoise[customerID] = WHindis;		   //Musterinin sectigi depoyu belirtiyoruz.
 }
 
 //Greedy Yaklasimi
@@ -184,7 +178,8 @@ void findCustomerMinCost(int customer)
 {
 	double minCost=999999999;
 	int temp = 0;
-	int minBCostIndis = minBuildCostHW();
+	//Minimum depo kurma maliyetine sahip deponun sirasini buluyoruz.
+	int minBCostIndis = minOrMaxValueFindIndis(&buildCostHW, 0);
 
 	//O musterinin minimum hangi depoya gittigine bakacagiz
 	for (int j = 0; j < roadCost[customer].indis; j++)
@@ -268,7 +263,9 @@ int main()
 
 	for (int i = 0; i < customerCapasity.indis; i++)
 	{
-		int max = maxCustomerCapasity();
+		//Maksimum depo alani talep eden musterinin indis degerini buluyoruz. 
+		//Bunun sebebi carpan degerinin buyumemesi icin max depo isteginde bulunan musteriyi baz almak icin kullanacagiz.
+		int max = minOrMaxValueFindIndis(&customerCapasity,1);
 		findCustomerMinCost(max);
 	}
 	builCostAdd();
