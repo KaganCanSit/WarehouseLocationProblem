@@ -2,6 +2,8 @@
 
 Problemin çözümü için genel yaklaşım Greedy yaklaşım ve cezalandırma üzerine kurulu olarak geliştirildi. Amaç optimallik değil, Greedy mantığı kullanarak yakınlaşma. Mantıksal olarak her kişi tarafından farklı algortima yaklaşımı ile geliştirilebileceği için kurduğum algoritmanın mantıksal olarak temelini ödev tanımında bulunan soru üzerinden gerçekleştirdiğim yaklaşımlar üzerinden anlatacağım.
 
+Burada sorunun tam olarak optimal çözümü ve net değere ulaşılması için "Karınca Kolonisi Algoritması" gibi veya Genetik Algoritmalar kullanılabilir.
+
 Ödev tanımında verilen örnek değerleri hatırlayalım.
 
 **Input**
