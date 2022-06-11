@@ -1,6 +1,6 @@
 # Warehouse Location Problem
 
-Ödevin çözümü için genel yaklaşım olarak Greedy yaklaşım ve cezalandırma kullandım. Mantıksal olarakher kişi tarafından farklı algortima yaklaşımı ile geliştirilebileceği için kurduğum algoritmanın mantıksal olarak temelini ödev tanımında bulunan soru üzerinden gerçekleştirdiğim yaklaşımlar üzerinden anlatacağım.
+Problemin çözümü için genel yaklaşım Greedy yaklaşım ve cezalandırma üzerine kurulu olarak geliştirildi. Amaç optimallik değil, Greedy mantığı kullanarak yakınlaşma. Mantıksal olarak her kişi tarafından farklı algortima yaklaşımı ile geliştirilebileceği için kurduğum algoritmanın mantıksal olarak temelini ödev tanımında bulunan soru üzerinden gerçekleştirdiğim yaklaşımlar üzerinden anlatacağım.
 
 Ödev tanımında verilen örnek değerleri hatırlayalım.
 
