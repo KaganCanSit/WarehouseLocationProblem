@@ -43,9 +43,9 @@ Burada sorunun tam olarak optimal çözümü ve net değere ulaşılması için 
 - Yüksek depolama talebini düşük fiyata vermek avantajlıdır. Bunu şu şekilde düşünebilirsiniz. 50 ve 100 iki yer talebiniz var. İkisini de 100 birime vereceksiniz. 100/50 - 100/100 şeklinde bakarsanız. Birinci durum için 1 deponun maliyeti iki birim, ikinci durum ise bir birimdir. Bu sebepten dolayı algoritmamızı kurarken büyük talebe sahip müşteriler, düşük talebe sahip müşterilerden önceliklidir.
 - Yeni deponun inşa maliyeti ve yeni depoya ulaşım maliyetinin toplamı, eski depoya ulaşım maliyetinden yüksekse(daha önce o depoyu kurduğumuz için kurulum maliyeti yok)  ve eski depoda bu ürünler için yer varsa ürünün eski depoya gitmesi daha avantajlıdır.
 - Müşterileri önceliklendirdik, peki depoları nasıl önceliklendirmeliyiz? En düşük kurulum maliyeti olan ve en düşük kurulum maliyetli depoya gidiş maliyetinin toplamı yeni depo kurulum maliyeti ve yeni depoya gidiş maliyeti toplamından küçükse en düşük maliyetli depoya git. Neden daha iyi fiyatlı yol varken diğerini tercih edeyim ki?
-- Bunun yanı sıra algoritmamızın yeterli kapasiteye sahip olmayan yerler için bir cezalandırma sistemine ihtiyacı var. Çünkü eğer yer yoksa  tekrar tekrar aynı alanın kontrol edilmesine gerek yok. Bunun için seçilen depoda müşterinin talebini karşılayacak kadar alan yoksa bu durum zatn kullanışsızdır ve tekrar sorgulanmamalıdır. Bunun için o depoya gidiş maliyetini arttırıyoruz. (x3) Bu sayede bu durum algoritmanın sorgu aralığının dışına çıkmış oluyor.
+- Bunun yanı sıra algoritmamızın yeterli kapasiteye sahip olmayan yerler için bir cezalandırma sistemine ihtiyacı var. Çünkü eğer yer yoksa  tekrar tekrar aynı alanın kontrol edilmesine gerek yok. Bunun için seçilen depoda müşterinin talebini karşılayacak kadar alan yoksa bu durum zaten kullanışsızdır ve tekrar sorgulanmamalıdır. Bunun için o depoya gidiş maliyetini arttırıyoruz. (x3) Bu sayede bu durum algoritmanın sorgu aralığının dışına çıkmış oluyor.
 
-Bu yaklaşımlar ışınğında örneğimize dönecek olursak en yüksek talebe sahip müşteri ve onun yol maliyetini alıyoruz.
+Bu yaklaşımlar ışığında örneğimize dönecek olursak en yüksek talebe sahip müşteri ve onun yol maliyetini alıyoruz.
 
 75 Talep
 
@@ -145,7 +145,7 @@ Burada koşulan algoritma her ne kadar belirli şartları kontrol ediyor olsa da
 
 Bizim burada yaptığımız fedakarlık optimala olabildiğince yakın fakat zaman olarak tüm olasılıklarını denemekten daha kısa sürede dönüt verebilecek bir algoritma ortaya koyamaktır.
 
-İyileştirmek için çeşitli işlemler gerçekleştirilebilir. Şu an için yazılın algoritmanın kilit noktası “void findCustomerMinCost(int customer)” fonksiyonu içerisinde yer alan aşağıda verilen kısımdır.
+İyileştirmek için çeşitli işlemler gerçekleştirilebilir. Şu an için yazılan algoritmanın kilit noktası “void findCustomerMinCost(int customer)” fonksiyonu içerisinde yer alan aşağıda verilen kısımdır.
 
 ```jsx
 //Depoda yer yoksa onlem!
